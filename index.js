@@ -1,39 +1,3 @@
-// var weight = 150;
-// var weight1 = 150;
-// var total = weight + weight1;
-// alert(total);
-// console.log(total);
-
-// var whatletsover = 4 % 2;
-// console.log(whatletsover);
-
-// prompt("huzii","fill it");
-// console.lop(prompt);
-
-// var age = +prompt("Enter Your Age");
-
-// function ageCalculator(Userage) {
-//   if (age <= 4) {
-//     console.log("You Are an Infant");
-//   } else if (age <= 15) {
-//     console.log("You Are a School Boy");
-//   } else if (age <= 25) {
-//     console.log("You Are a Lover");
-//   } else if (age <= 35) {
-//     console.log("You Are a Soldier");
-//   } else if (age <= 45) {
-//     console.log("You Are a Justice Lover");
-//   } else if (age <= 60) {
-//     console.log("You Are an Old Man");
-//   } else if (age <= 90) {
-//     console.log("Extreme Old Age");
-//   } else {
-//     console.log("You Are Close to Dying");
-//   }
-// }
-
-// ageCalculator(Userage);
-
 const cardsArray = [
   { name: "apple", img: "./IMAGES/APPLE.jpeg" },
   { name: "banana", img: "./IMAGES/banana.webp" },
@@ -43,7 +7,6 @@ const cardsArray = [
   { name: "peach", img: "./IMAGES/peach.jpeg" },
 ];
 
-
 // Duplicate and shuffle cards
 let cards = [...cardsArray, ...cardsArray].sort(() => Math.random() - 0.5);
 
@@ -51,77 +14,35 @@ const gameGrid = document.querySelector(".game-grid");
 let firstCard = null;
 let secondCard = null;
 let lockBoard = false;
+let moves = 0;
+let startTime = null;
+let timerInterval = null;
 
 // Create card elements
-cards.forEach(({ name, img }) => {
-  const card = document.createElement("div");
-  card.classList.add("card");
-  card.dataset.name = name;
+function createCards() {
+  gameGrid.innerHTML = "";
+  cards.forEach(({ name, img }) => {
+    const card = document.createElement("div");
+    card.classList.add("card");
+    card.dataset.name = name;
 
-  const imgElement = document.createElement("img");
-  imgElement.src = img;
-  card.appendChild(imgElement);
+    const frontFace = document.createElement("img");
+    frontFace.src = img;
+    frontFace.classList.add("front-face");
 
-  gameGrid.appendChild(card);
+    const backFace = document.createElement("img");
+    backFace.src = "./IMAGES/img.png"; // Replace with your card back image
+    backFace.classList.add("back-face");
 
-  card.addEventListener("click", flipCard);
-});
+    card.appendChild(frontFace);
+    card.appendChild(backFace);
+    gameGrid.appendChild(card);
 
-function flipCard() {
-  if (lockBoard || this === firstCard) return;
-
-  this.classList.add("flipped");
-
-  if (!firstCard) {
-    firstCard = this;
-    return;
-  }
-
-  secondCard = this;
-  checkMatch();
+    card.addEventListener("click", flipCard);
+  });
 }
 
-function checkMatch() {
-  const isMatch = firstCard.dataset.name === secondCard.dataset.name;
-
-  if (isMatch) {
-    disableCards();
-  } else {
-    unflipCards();
-  }
-}
-
-function disableCards() {
-  firstCard.removeEventListener("click", flipCard);
-  secondCard.removeEventListener("click", flipCard);
-
-  resetBoard();
-}
-
-function unflipCards() {
-  lockBoard = true;
-
-  setTimeout(() => {
-    firstCard.classList.remove("flipped");
-    secondCard.classList.remove("flipped");
-
-    resetBoard();
-  }, 1000);
-}
-
-function resetBoard() {
-  [firstCard, secondCard, lockBoard] = [null, null, false];
-}
-
-let moves = 0;
-
-// Update move counter
-function updateMoveCount() {
-  moves++;
-  document.getElementById("move-count").textContent = moves;
-}
-
-// Modify flipCard to update moves
+// Flip card
 function flipCard() {
   if (lockBoard || this === firstCard) return;
 
@@ -137,26 +58,79 @@ function flipCard() {
   checkMatch();
 }
 
+// Check for a match
+function checkMatch() {
+  const isMatch = firstCard.dataset.name === secondCard.dataset.name;
+
+  if (isMatch) {
+    disableCards();
+  } else {
+    unflipCards();
+  }
+
+  // Check if all cards are matched
+  setTimeout(checkVictory, 500);
+}
+
+// Disable matched cards
+function disableCards() {
+  firstCard.removeEventListener("click", flipCard);
+  secondCard.removeEventListener("click", flipCard);
+  resetBoard();
+}
+
+// Unflip cards
+function unflipCards() {
+  lockBoard = true;
+  setTimeout(() => {
+    firstCard.classList.remove("flipped");
+    secondCard.classList.remove("flipped");
+    resetBoard();
+  }, 1000);
+}
+
+// Reset board state
+function resetBoard() {
+  [firstCard, secondCard, lockBoard] = [null, null, false];
+}
+
+// Update move count
+function updateMoveCount() {
+  moves++;
+  document.getElementById("move-count").textContent = moves;
+}
+
+// Check for victory
+function checkVictory() {
+  const flippedCards = document.querySelectorAll(".card.flipped");
+  if (flippedCards.length === cards.length) {
+    clearInterval(timerInterval);
+    alert(`Congratulations! You won in ${moves} moves and ${document.getElementById("timer").textContent}!`);
+  }
+}
+
+// Timer
+function startTimer() {
+  startTime = new Date();
+  timerInterval = setInterval(() => {
+    const currentTime = new Date();
+    const timeElapsed = Math.floor((currentTime - startTime) / 1000);
+    document.getElementById("timer").textContent = `Time: ${timeElapsed}s`;
+  }, 1000);
+}
+
 // Restart game
 document.getElementById("restart-button").addEventListener("click", () => {
-  gameGrid.innerHTML = "";
   moves = 0;
   document.getElementById("move-count").textContent = moves;
+  document.getElementById("timer").textContent = "Time: 0s";
+  clearInterval(timerInterval);
   resetBoard();
-
   cards = [...cardsArray, ...cardsArray].sort(() => Math.random() - 0.5);
-
-  cards.forEach(({ name, img }) => {
-    const card = document.createElement("div");
-    card.classList.add("card");
-    card.dataset.name = name;
-
-    const imgElement = document.createElement("img");
-    imgElement.src = img;
-    card.appendChild(imgElement);
-
-    gameGrid.appendChild(card);
-
-    card.addEventListener("click", flipCard);
-  });
+  createCards();
+  startTimer();
 });
+
+// Initialize game
+createCards();
+startTimer();
