@@ -7,18 +7,13 @@
   <link rel="stylesheet" href="./index.css">
 </head>
 <body>
-  <div class="game-container">
-    <header>
-      <h1>Memory Card Matching Game</h1>
-      <div class="scoreboard">
-        <p>Moves: <span id="move-count">0</span></p>
-        <button id="restart-button">Restart</button>
-      </div>
-    </header>
-    <div class="game-grid">
-      <!-- Cards will be dynamically added here -->
-    </div>
+  <h1>Memory Card Matching Game</h1>
+  <div class="scoreboard">
+    <p>Moves: <span id="move-count">0</span></p>
+    <p id="timer">Time: 0s</p>
+    <button id="restart-button">Restart</button>
   </div>
+  <div class="game-grid"></div>
   <script src="index.js"></script>
 </body>
 </html>
